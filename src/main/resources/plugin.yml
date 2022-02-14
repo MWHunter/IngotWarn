@@ -1,0 +1,26 @@
+name: IngotWarn
+main: com.budderman18.IngotWarn.main
+version: 1.0
+commands:
+   warn:
+       description: Send a warn to an online or offline player
+       default: op
+   checkwarns:
+       description: Check your warns
+       default: true
+   adminwarn:
+       description: Access admin management for IngotWarn
+       default: op
+permissions:
+   ingotwarn.warn:
+      description: Gives access to the warn command
+      default: op
+   ingotwarn.checkwarns:
+      description: Gives access to the checkwarns command
+      default: true
+   ingotwarn.adminwarn:
+      description: Gives access to the adminwarn command
+      default: op
+   ingotwarn.checkwarns.others:
+      description: Gives access to checking other peoples' warns
+      default: op

@@ -1,0 +1,16 @@
+#Configure every message here!
+#Note: changing the command names here doesnt actually change them
+#Example: Changing "/pwbt help" to "pwbt assists" doesn't change the command. You still need to use "/pwbt help"
+Prefix-Message: "&2[&9IngotWarn&2] "
+Incorrect-Command-Message: "&bIncorrect Command"
+No-Permission-Message: "&bYou do not have permission to use that!"
+Warned-Player-Message: "&cYou have just been warned! Reason: &b"
+You-Warned-Player-Message: "&bYou have just warned &6"
+Unsupported-VersionA-Message: "&4IngotWarn does not support your version!"
+Unsupported-VersionB-Message: "&aOnly 1.18.1 is supported"
+Unsupported-VersionC-Message: "&aThis plugin will likely not work and you will get no help for issues"
+Unsecure-ServerA-Message: "&4NEVER EVER EVER EVER EVER EVER USE OFFLINE MODE!!!!!!!!!!!!!!!"
+Unsecure-ServerB-Message: "&cOffline mode is a serious threat to your server and will never be supported by my plugins!"
+Unsecure-ServerC-Message: "&cTo protect your safety and this plugin's saftey, this plugin will now be disabled"
+Plugin-Enabled-Message: "&eIngotWarn by Budderman18 has been enabled!"
+Plugin-Disabled-Message: "&eIngotWarn has been disabled!"
