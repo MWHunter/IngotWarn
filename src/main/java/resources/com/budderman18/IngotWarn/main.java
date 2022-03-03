@@ -1,178 +1,194 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+/*     */ package com.budderman18.IngotWarn;
+/*     */ 
+/*     */ import java.io.File;
+/*     */ import java.io.IOException;
+/*     */ import java.util.UUID;
+/*     */ import java.util.logging.Level;
+/*     */ import java.util.logging.Logger;
+/*     */ import org.bukkit.Bukkit;
+/*     */ import org.bukkit.ChatColor;
+/*     */ import org.bukkit.command.CommandExecutor;
+/*     */ import org.bukkit.configuration.file.YamlConfiguration;
+/*     */ import org.bukkit.entity.Player;
+/*     */ import org.bukkit.event.EventHandler;
+/*     */ import org.bukkit.event.EventPriority;
+/*     */ import org.bukkit.event.Listener;
+/*     */ import org.bukkit.event.player.PlayerJoinEvent;
+/*     */ import org.bukkit.plugin.Plugin;
+/*     */ import org.bukkit.plugin.java.JavaPlugin;
+/*     */ 
+/*     */ 
+/*     */ 
+/*     */ 
+/*     */ 
+/*     */ public class main
+/*     */   extends JavaPlugin
+/*     */   implements Listener
+/*     */ {
+/*  28 */   final String ROOT = "";
+/*     */   
+/*  30 */   InstanceData getdata = new InstanceData();
+/*     */ 
+/*     */   
+/*     */   private static main plugin;
+/*     */ 
+/*     */ 
+/*     */   
+/*     */   private void createFiles() {
+/*  38 */     File configf = new File(getDataFolder(), "config.yml");
+/*  39 */     if (!configf.exists()) {
+/*  40 */       configf.getParentFile().mkdirs();
+/*  41 */       saveResource("config.yml", false);
+/*     */     } 
+/*     */     
+/*  44 */     YamlConfiguration yamlConfiguration1 = new YamlConfiguration();
+/*     */     try {
+/*  46 */       yamlConfiguration1.load(configf);
+/*  47 */     } catch (IOException|org.bukkit.configuration.InvalidConfigurationException e) {
+/*  48 */       e.printStackTrace();
+/*     */     } 
+/*  50 */     File playerdataf = new File(getDataFolder(), "playerdata.yml");
+/*  51 */     if (!playerdataf.exists()) {
+/*  52 */       playerdataf.getParentFile().mkdirs();
+/*  53 */       saveResource("playerdata.yml", false);
+/*     */     } 
+/*     */     
+/*  56 */     YamlConfiguration yamlConfiguration2 = new YamlConfiguration();
+/*     */     try {
+/*  58 */       yamlConfiguration2.load(playerdataf);
+/*  59 */     } catch (IOException|org.bukkit.configuration.InvalidConfigurationException e) {
+/*  60 */       e.printStackTrace();
+/*     */     } 
+/*  62 */     File languagef = new File(getDataFolder(), "language.yml");
+/*  63 */     if (!languagef.exists()) {
+/*  64 */       languagef.getParentFile().mkdirs();
+/*  65 */       saveResource("language.yml", false);
+/*     */     } 
+/*     */     
+/*  68 */     YamlConfiguration yamlConfiguration3 = new YamlConfiguration();
+/*     */     try {
+/*  70 */       yamlConfiguration3.load(languagef);
+/*  71 */     } catch (IOException|org.bukkit.configuration.InvalidConfigurationException e) {
+/*  72 */       e.printStackTrace();
+/*     */     } 
+/*     */   }
+/*     */ 
+/*     */ 
+/*     */   
+/*     */   public static main getInstance() {
+/*  79 */     return plugin;
+/*     */   }
+/*     */   
+/*     */   public void onEnable() {
+/*  83 */     plugin = this;
+/*  84 */     createFiles();
+/*     */     
+/*  86 */     YamlConfiguration yamlConfiguration1 = this.getdata.getCustomData((Plugin)plugin, "config", "");
+/*  87 */     YamlConfiguration yamlConfiguration2 = this.getdata.getCustomData((Plugin)plugin, "language", "");
+/*  88 */     YamlConfiguration yamlConfiguration3 = this.getdata.getCustomData((Plugin)plugin, "playerdata", "");
+/*     */     
+/*  90 */     String prefixMessage = ChatColor.translateAlternateColorCodes('&', yamlConfiguration2.getString("Prefix-Message"));
+/*  91 */     String unsupportedVersionAMessage = ChatColor.translateAlternateColorCodes('&', yamlConfiguration2.getString("Unsupported-VersionA-Message"));
+/*  92 */     String unsupportedVersionBMessage = ChatColor.translateAlternateColorCodes('&', yamlConfiguration2.getString("Unsupported-VersionB-Message"));
+/*  93 */     String unsupportedVersionCMessage = ChatColor.translateAlternateColorCodes('&', yamlConfiguration2.getString("Unsupported-VersionC-Message"));
+/*  94 */     String unsecureServerAMessage = ChatColor.translateAlternateColorCodes('&', yamlConfiguration2.getString("Unsecure-ServerA-Message"));
+/*  95 */     String unsecureServerBMessage = ChatColor.translateAlternateColorCodes('&', yamlConfiguration2.getString("Unsecure-ServerB-Message"));
+/*  96 */     String unsecureServerCMessage = ChatColor.translateAlternateColorCodes('&', yamlConfiguration2.getString("Unsecure-ServerC-Message"));
+/*  97 */     String pluginEnabledMessage = ChatColor.translateAlternateColorCodes('&', yamlConfiguration2.getString("Plugin-Enabled-Message"));
+/*     */     
+/*  99 */     if (!Bukkit.getVersion().contains("1.18.2")) {
+/* 100 */       getServer().getConsoleSender().sendMessage(prefixMessage + prefixMessage);
+/* 101 */       getServer().getConsoleSender().sendMessage(prefixMessage + prefixMessage);
+/* 102 */       getServer().getConsoleSender().sendMessage(prefixMessage + prefixMessage);
+/*     */       
+/*     */       return;
+/*     */     } 
+/* 106 */     if (!getServer().getOnlineMode()) {
+/* 107 */       getServer().getConsoleSender().sendMessage(prefixMessage + prefixMessage);
+/* 108 */       getServer().getConsoleSender().sendMessage(prefixMessage + prefixMessage);
+/* 109 */       getServer().getConsoleSender().sendMessage(prefixMessage + prefixMessage);
+/* 110 */       getServer().getPluginManager().disablePlugin((Plugin)this);
+/*     */     } 
+/*     */     
+/* 113 */     getCommand("warn").setExecutor((CommandExecutor)new Warn());
+/* 114 */     getCommand("checkwarns").setExecutor((CommandExecutor)new CheckWarn());
+/*     */     
+/* 116 */     getServer().getPluginManager().registerEvents(this, (Plugin)this);
+/* 117 */     getServer().getPluginManager().enablePlugin((Plugin)this);
+/* 118 */     getServer().getConsoleSender().sendMessage(prefixMessage + prefixMessage);
+/*     */   }
+/*     */ 
+/*     */ 
+/*     */ 
+/*     */   
+/*     */   @EventHandler(priority = EventPriority.HIGHEST)
+/*     */   public void onPlayerJoin(PlayerJoinEvent event) throws IOException {
+/* 126 */     Plugin plugin = getServer().getPluginManager().getPlugin("IngotWarn");
+/* 127 */     YamlConfiguration yamlConfiguration1 = this.getdata.getCustomData(plugin, "language", "");
+/* 128 */     YamlConfiguration yamlConfiguration2 = this.getdata.getCustomData(plugin, "playerdata", "");
+/* 129 */     File playerdataf = new File("plugins/IngotWarn", "playerdata.yml");
+/*     */     
+/* 131 */     String prefixMessage = ChatColor.translateAlternateColorCodes('&', yamlConfiguration1.getString("Prefix-Message"));
+/* 132 */     String newPlayerMessage = ChatColor.translateAlternateColorCodes('&', yamlConfiguration1.getString("New-Player-Message"));
+/*     */     
+/* 134 */     Player username = event.getPlayer();
+/* 135 */     String usernameString = this.getdata.convertUsername(username);
+/* 136 */     if (yamlConfiguration2.getString(usernameString) == null) {
+/*     */       
+/* 138 */       yamlConfiguration2.createSection(usernameString);
+/*     */       
+/* 140 */       getServer().getConsoleSender().sendMessage(prefixMessage + prefixMessage);
+/* 141 */       getServer().getConsoleSender().sendMessage("pdf = " + playerdataf.toString());
+/* 142 */       getServer().getConsoleSender().sendMessage("pd = " + yamlConfiguration2.toString());
+/*     */       
+/* 144 */       UUID uuid = username.getUniqueId();
+/* 145 */       yamlConfiguration2.set(usernameString + ".UUID", uuid.toString());
+/*     */       
+/* 147 */       yamlConfiguration2.save(playerdataf);
+/*     */     } 
+/*     */   }
+/*     */ 
+/*     */ 
+/*     */ 
+/*     */ 
+/*     */   
+/*     */   public void onDisable() {
+/* 156 */     Plugin plugin = getServer().getPluginManager().getPlugin("IngotWarn");
+/* 157 */     File configf = new File("plugins/IngotWarn", "config.yml");
+/* 158 */     File languagef = new File("plugins/IngotWarn", "language.yml");
+/* 159 */     File playerdataf = new File("plugins/IngotWarn", "playerdata.yml");
+/* 160 */     YamlConfiguration yamlConfiguration1 = this.getdata.getCustomData(plugin, "config", "");
+/* 161 */     YamlConfiguration yamlConfiguration2 = this.getdata.getCustomData(plugin, "language", "");
+/* 162 */     YamlConfiguration yamlConfiguration3 = this.getdata.getCustomData(plugin, "playerdata", "");
+/*     */     
+/* 164 */     String prefixMessage = ChatColor.translateAlternateColorCodes('&', yamlConfiguration2.getString("Prefix-Message"));
+/* 165 */     String pluginDisabledMessage = ChatColor.translateAlternateColorCodes('&', yamlConfiguration2.getString("Plugin-Disabled-Message"));
+/*     */     
+/*     */     try {
+/* 168 */       yamlConfiguration1.save(configf);
+/*     */     }
+/* 170 */     catch (IOException ex) {
+/* 171 */       Logger.getLogger(main.class.getName()).log(Level.SEVERE, (String)null, ex);
+/*     */     } 
+/*     */     try {
+/* 174 */       yamlConfiguration2.save(languagef);
+/*     */     }
+/* 176 */     catch (IOException ex) {
+/* 177 */       Logger.getLogger(main.class.getName()).log(Level.SEVERE, (String)null, ex);
+/*     */     } 
+/*     */     try {
+/* 180 */       yamlConfiguration3.save(playerdataf);
+/*     */     }
+/* 182 */     catch (IOException ex) {
+/* 183 */       Logger.getLogger(main.class.getName()).log(Level.SEVERE, (String)null, ex);
+/*     */     } 
+/* 185 */     getServer().getPluginManager().disablePlugin((Plugin)this);
+/* 186 */     getServer().getConsoleSender().sendMessage(prefixMessage + prefixMessage);
+/*     */   }
+/*     */ }
+
+
+/* Location:              C:\Users\Kyle Collins\Downloads\IngotWarn-1.0-SNAPSHOT.jar!\com\budderman18\IngotWarn\main.class
+ * Java compiler version: 17 (61.0)
+ * JD-Core Version:       1.1.3
  */
-package com.budderman18.IngotWarn;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.configuration.InvalidConfigurationException;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.plugin.Plugin;
-import org.bukkit.plugin.java.JavaPlugin;
-
-/**
- *
- * @author Kyle Collins
- */
-public class main extends JavaPlugin {
-    private File configf;
-    private File languagef; 
-    private FileConfiguration config; 
-    private FileConfiguration language; 
-    private File playerdataf;
-    private FileConfiguration pd;;
-    /*
-    * Enables the plugin.
-    * Check if MC version isn't the latest.
-    * If its not, warn the player about lacking support
-    * Also checks for dependencies and loads commands
-    * Also saves and loads config
-    */  
-    private void createFiles() {
-        configf = new File(getDataFolder(), "config.yml");
-        if (!configf.exists()) {
-            configf.getParentFile().mkdirs();
-            saveResource("config.yml", false);
-         }
-
-        config = new YamlConfiguration();
-        try {
-            config.load(configf);
-        } catch (IOException | InvalidConfigurationException e) {
-            e.printStackTrace();
-        }
-        languagef = new File(getDataFolder(), "language.yml");
-        if (!languagef.exists()) {
-            languagef.getParentFile().mkdirs();
-            saveResource("language.yml", false);
-         }
-
-        language = new YamlConfiguration();
-        try {
-            language.load(configf);
-        } catch (IOException | InvalidConfigurationException e) {
-            e.printStackTrace();
-        }
-        playerdataf = new File(getDataFolder(), "playerdata.yml");
-        if (!playerdataf.exists()) {
-            playerdataf.getParentFile().mkdirs();
-            saveResource("playerdata.yml", false);
-         }
-
-        pd = new YamlConfiguration();
-        try {
-            pd.load(playerdataf);
-        } catch (IOException | InvalidConfigurationException e) {
-            e.printStackTrace();
-        }
-    }
-    @Override
-    public void onEnable() {
-        createFiles();
-        //language variables defaults (in order)
-        String prefixMessage = ChatColor.translateAlternateColorCodes('&', "&2[&9IngotWarn&2] ");
-        String unsupportedVersionAMessage = ChatColor.translateAlternateColorCodes('&', "&4IngotWarn does not support your version!");
-        String unsupportedVersionBMessage = ChatColor.translateAlternateColorCodes('&', "&aOnly 1.18.1 is supported");
-        String unsupportedVersionCMessage = ChatColor.translateAlternateColorCodes('&', "&aThis plugin will likely not work and you will get no help for issues");
-        String unsecureServerAMessage = ChatColor.translateAlternateColorCodes('&', "&4NEVER EVER EVER EVER EVER EVER USE OFFLINE MODE!!!!!!!!!!!!!!!");
-        String unsecureServerBMessage = ChatColor.translateAlternateColorCodes('&', "&cOffline mode is a serious threat to your server and will never be supported by my plugins!");
-        String unsecureServerCMessage = ChatColor.translateAlternateColorCodes('&', "&cTo protect your safety and this plugin's saftey, this plugin will now be disabled");
-        String pluginEnabledMessage = ChatColor.translateAlternateColorCodes('&', "&eIngotWarn by Budderman18 has been enabled!");
-        //check if it can retrive the message strings
-        if (language.getString("Prefix-Message") != null) {
-            prefixMessage = ChatColor.translateAlternateColorCodes('&', language.getString("Prefix-Message")); 
-        }
-        if (language.getString("Unsupported-VersionA-Message") != null) {
-            unsupportedVersionAMessage = ChatColor.translateAlternateColorCodes('&', language.getString("Unsupported-VersionA-Message")); 
-        }
-        if (language.getString("Unsupported-VersionB-Message") != null) {
-            unsupportedVersionBMessage = ChatColor.translateAlternateColorCodes('&', language.getString("Unsupported-VersionB-Message")); 
-        }
-        if (language.getString("Unsupported-VersionC-Message") != null) {
-            unsupportedVersionCMessage = ChatColor.translateAlternateColorCodes('&', language.getString("Unsupported-VersionC-Message")); 
-        }
-        if (language.getString("Unsecure-ServerA-Message") != null) {
-            unsecureServerAMessage = ChatColor.translateAlternateColorCodes('&', language.getString("Unsecure-ServerA-Message")); 
-        }
-        if (language.getString("Unsecure-ServerB-Message") != null) {
-            unsecureServerBMessage = ChatColor.translateAlternateColorCodes('&', language.getString("Unsecure-ServerB-Message")); 
-        }
-        if (language.getString("Unsecure-ServerC-Message") != null) {
-            unsecureServerCMessage = ChatColor.translateAlternateColorCodes('&', language.getString("Unsecure-ServerC-Message")); 
-        }
-        if (language.getString("Plugin-Enabled-Message") != null) {
-            pluginEnabledMessage = ChatColor.translateAlternateColorCodes('&', language.getString("Plugin-Enabled-Message")); 
-        }
-        if (!(Bukkit.getVersion().contains("1.18.1"))) {
-            getServer().getConsoleSender().sendMessage(prefixMessage + unsupportedVersionAMessage);
-            getServer().getConsoleSender().sendMessage(prefixMessage + unsupportedVersionBMessage);
-            getServer().getConsoleSender().sendMessage(prefixMessage + unsupportedVersionCMessage);
-            return;   
-        }
-        if (!(getServer().getOnlineMode())) {
-            getServer().getConsoleSender().sendMessage(prefixMessage + unsecureServerAMessage);
-            getServer().getConsoleSender().sendMessage(prefixMessage + unsecureServerBMessage);
-            getServer().getConsoleSender().sendMessage(prefixMessage + unsecureServerCMessage);
-            getServer().getPluginManager().disablePlugin(this);
-        }
-        //commands
-        this.getCommand("warn").setExecutor(new Warn());
-        getServer().getPluginManager().enablePlugin(this);
-        getServer().getConsoleSender().sendMessage(prefixMessage + pluginEnabledMessage);
-    }
-    //these 3 methods help retrive files when in other classes
-    public FileConfiguration getCustomConfig() {
-        return this.config;
-    }
-    public FileConfiguration getCustomPlayerData() {
-        return this.pd;
-    }
-    public FileConfiguration getCustomLanguage() {
-        return this.language;
-    }
-    /*
-    * Disables the plugin.
-    */
-    @Override
-    public void onDisable() {
-        String prefixMessage = ChatColor.translateAlternateColorCodes('&', "&2[&9IngotWarn&2] ");
-        String pluginDisabledMessage = ChatColor.translateAlternateColorCodes('&', "&eIngotWarn has been disabled!");
-        if (language.getString("Prefix-Message") != null) {
-            prefixMessage = ChatColor.translateAlternateColorCodes('&', language.getString("Prefix-Message")); 
-        }
-        if (language.getString("Plugin-Disabled-Message") != null) {
-            pluginDisabledMessage = ChatColor.translateAlternateColorCodes('&', language.getString("Plugin-Disabled-Message")); 
-        }
-        Plugin plugin = Bukkit.getPluginManager().getPlugin("IngotWarn");
-        //files
-        File configf = new File(plugin.getDataFolder(), "config.yml");
-        File playerdataf = new File(plugin.getDataFolder(), "playerdata.yml");
-        File languagef = new File(plugin.getDataFolder(), "language.yml");
-        FileConfiguration pd = YamlConfiguration.loadConfiguration(playerdataf);
-        FileConfiguration language = YamlConfiguration.loadConfiguration(languagef);
-        FileConfiguration config = YamlConfiguration.loadConfiguration(configf);
-        try {
-            config.save(configf);
-        } catch (IOException ex) {
-            Logger.getLogger(main.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        try {
-            language.save(languagef);
-        } catch (IOException ex) {
-            Logger.getLogger(main.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        try {
-            language.save(playerdataf);
-        } catch (IOException ex) {
-            Logger.getLogger(main.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        getServer().getPluginManager().disablePlugin(this);
-        getServer().getConsoleSender().sendMessage(prefixMessage + pluginDisabledMessage);
-    }
-}
