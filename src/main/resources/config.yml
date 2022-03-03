@@ -1,2 +1,6 @@
 #dont touch
 version: "1.0"
+#Changes how many warns a user can have
+#Note that the bigger the number, the faster the playerdata.yml will fill up
+#Max length of 127
+Max-Warns: "10"
