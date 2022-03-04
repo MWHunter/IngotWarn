@@ -1,91 +1,130 @@
-/*    */ package com.budderman18.IngotWarn;
-/*    */ 
-/*    */ import java.util.List;
-/*    */ import org.bukkit.Bukkit;
-/*    */ import org.bukkit.ChatColor;
-/*    */ import org.bukkit.command.Command;
-/*    */ import org.bukkit.command.CommandSender;
-/*    */ import org.bukkit.command.TabExecutor;
-/*    */ import org.bukkit.configuration.file.FileConfiguration;
-/*    */ import org.bukkit.configuration.file.YamlConfiguration;
-/*    */ import org.bukkit.entity.Player;
-/*    */ import org.bukkit.plugin.Plugin;
-/*    */ 
-/*    */ 
-/*    */ 
-/*    */ 
-/*    */ 
-/*    */ public class CheckWarn
-/*    */   implements TabExecutor
-/*    */ {
-/* 21 */   Plugin plugin = (Plugin)main.getInstance();
-/*    */   
-/* 23 */   final String ROOT = "";
-/*    */   
-/* 25 */   InstanceData getdata = new InstanceData();
-/* 26 */   FileConfiguration config = (FileConfiguration)this.getdata.getCustomData(this.plugin, "config", "");
-/* 27 */   FileConfiguration language = (FileConfiguration)this.getdata.getCustomData(this.plugin, "language", "");
-/*    */ 
-/*    */ 
-/*    */ 
-/*    */ 
-/*    */ 
-/*    */ 
-/*    */ 
-/*    */ 
-/*    */ 
-/*    */ 
-/*    */ 
-/*    */   
-/*    */   public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-/* 41 */     YamlConfiguration yamlConfiguration = this.getdata.getCustomData(this.plugin, "playerdata", "");
-/*    */     
-/* 43 */     String prefixMessage = ChatColor.translateAlternateColorCodes('&', this.language.getString("Prefix-Message"));
-/* 44 */     String incorrectCommandMessage = ChatColor.translateAlternateColorCodes('&', this.language.getString("Incorrect-Command-Message"));
-/* 45 */     String noPermissionMessage = ChatColor.translateAlternateColorCodes('&', this.language.getString("No-Permission-Message"));
-/* 46 */     String noPlayerMessage = ChatColor.translateAlternateColorCodes('&', this.language.getString("No-Player-Message"));
-/*    */     
-/* 48 */     String player = Bukkit.getServer().getPlayer(sender.getName()).getName();
-/* 49 */     Player username = Bukkit.getPlayer(player);
-/* 50 */     String usernameString = this.getdata.convertUsername(username);
-/* 51 */     if (cmd.getName().equalsIgnoreCase("checkwarns") && 
-/* 52 */       args.length == 0) {
-/* 53 */       if (sender.hasPermission("ingotwarn.checkwarns")) {
-/*    */         
-/* 55 */         sender.sendMessage("Player: " + usernameString);
-/* 56 */         byte maxWarns = (byte)Integer.parseInt(this.config.getString("Max-Warns"));
-/* 57 */         sender.sendMessage("UUID: " + yamlConfiguration.getString(usernameString + ".UUID"));
-/* 58 */         sender.sendMessage("Max Warns: " + maxWarns); byte i;
-/* 59 */         for (i = 1; i < maxWarns + 1; i = (byte)(i + 1)) {
-/* 60 */           if (yamlConfiguration.get(usernameString + ".Warn" + usernameString) != null) {
-/* 61 */             sender.sendMessage("Warn" + i + ": " + yamlConfiguration.get(usernameString + ".Warn" + usernameString));
-/*    */           } else {
-/*    */             
-/* 64 */             i = maxWarns;
-/*    */           } 
-/*    */         } 
-/* 67 */         sender.sendMessage("Done!");
-/* 68 */         return true;
-/*    */       } 
-/*    */       
-/* 71 */       sender.sendMessage(prefixMessage + prefixMessage);
-/* 72 */       return false;
-/*    */     } 
-/*    */ 
-/*    */     
-/* 76 */     return false;
-/*    */   }
-/*    */ 
-/*    */ 
-/*    */ 
-/*    */   
-/*    */   public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-/* 83 */     return null;
-/*    */   }
-/*    */ }
+package com.budderman18.IngotWarn;
 
-
-/* Location:              C:\Users\Kyle Collins\Downloads\IngotWarn-1.0-SNAPSHOT.jar!\com\budderman18\IngotWarn\CheckWarn.class
- * Java compiler version: 17 (61.0)
- * JD-Core Version:       1.1.3
+import java.util.List;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabExecutor;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
+/**
+ * This class handles the checkwarns command
  */
+public class CheckWarn implements TabExecutor {
+    //retrive plugin instance
+    Plugin plugin = main.getInstance();
+    //used if the given file isnt in another folder
+    final String ROOT = "";
+    //imports files
+    InstanceData getdata = new InstanceData();
+    FileConfiguration config = getdata.getCustomData(plugin,"config",ROOT);
+    FileConfiguration language = getdata.getCustomData(plugin,"language",ROOT);
+    /**
+     * This method handles everything related to the checkwarns command
+     * TabCompletion has its own method
+     * 
+     * @param sender
+     * @param cmd
+     * @param label
+     * @param args
+     * @return 
+     */
+    @Override
+    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+        //import userfile
+        FileConfiguration pd = getdata.getCustomData(plugin,"playerdata",ROOT);
+        //language variables
+        String prefixMessage = ChatColor.translateAlternateColorCodes('&', language.getString("Prefix-Message")); 
+        String noPermissionMessage = ChatColor.translateAlternateColorCodes('&', language.getString("No-Permission-Message"));
+        String noPlayerMessage = ChatColor.translateAlternateColorCodes('&', language.getString("No-Player-Message"));
+        String playerMessage = ChatColor.translateAlternateColorCodes('&', language.getString("Player-Message"));
+        String uuidMessage = ChatColor.translateAlternateColorCodes('&', language.getString("UUID-Message"));
+        String warnStartMessage = ChatColor.translateAlternateColorCodes('&', language.getString("Warn-Start-Message"));
+        String warnEndMessage = ChatColor.translateAlternateColorCodes('&', language.getString("Warn-End-Message"));
+        String startOfListMessage = ChatColor.translateAlternateColorCodes('&', language.getString("Start-Of-List-Message"));
+        String endOfListMessage = ChatColor.translateAlternateColorCodes('&', language.getString("End-Of-List-Message"));
+        if (cmd.getName().equalsIgnoreCase("checkwarns")) {
+            //check if the defaukt player is used (sender)
+            if (args.length == 0) {
+                //check if sender is a player
+                if ((sender instanceof Player)) {
+                    //converts username back into an actual string, since "toString()" leaves useless junk that messes things up
+                    String player = Bukkit.getServer().getPlayer(sender.getName()).getName();
+                    Player username = Bukkit.getPlayer(player);
+                    String usernameString = getdata.convertUsername(username);
+                    //check for permission
+                    if (sender.hasPermission("ingotwarn.checkwarns")) {
+                        //outputs userfile
+                        sender.sendMessage(prefixMessage + startOfListMessage);
+                        sender.sendMessage(playerMessage + usernameString);
+                        byte maxWarns = (byte) Integer.parseInt(config.getString("Max-Warns"));
+                        sender.sendMessage(uuidMessage + pd.getString(usernameString + ".UUID"));
+                        for (byte i=1; i < maxWarns + 1; i++) {
+                            if (pd.get(usernameString+".Warn" + i) != null) {
+                                sender.sendMessage(warnStartMessage + i + warnEndMessage + pd.get(usernameString+".Warn" + i));
+                            }
+                            else {
+                                i = maxWarns;
+                            }
+                        }
+                        sender.sendMessage(prefixMessage + endOfListMessage);
+                        return true;
+                    }
+                    //send if player lacks permission
+                    else {
+                        sender.sendMessage(prefixMessage + noPermissionMessage);
+                        return true;
+                    }
+                }
+                //send if sender is not a player
+                else {
+                    return false;
+                }
+            }
+            //check if a user is specified
+            if (args.length >= 1) {
+                String usernameString = args[0];
+                //check if player has permission
+                if (sender.hasPermission("ingotwarn.checkwarns.others")) {
+                    if (pd.getConfigurationSection(usernameString) != null) {
+                        //outputs userfile
+                        sender.sendMessage(prefixMessage + startOfListMessage);
+                        sender.sendMessage(playerMessage + usernameString);
+                        byte maxWarns = (byte) Integer.parseInt(config.getString("Max-Warns"));
+                        sender.sendMessage(uuidMessage + pd.getString(usernameString + ".UUID"));
+                        for (byte i=1; i < maxWarns + 1; i++) {
+                            if (pd.get(usernameString+".Warn" + i) != null) {
+                                sender.sendMessage(warnStartMessage + i + warnEndMessage + pd.get(usernameString+".Warn" + i));
+                            }
+                            else {
+                                i = maxWarns;
+                            }
+                        }
+                        sender.sendMessage(prefixMessage + endOfListMessage);
+                        return true;
+                    }
+                    //send if player isnt found
+                    else {
+                        sender.sendMessage(prefixMessage + noPlayerMessage);
+                        return true;
+                    }
+                }
+                //send if lacking permission
+                else {
+                    sender.sendMessage(prefixMessage + noPermissionMessage);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    /*
+    * This method handles tabcompletion when required
+    */
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+        return null;
+    }
+}
