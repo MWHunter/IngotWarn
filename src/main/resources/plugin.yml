@@ -5,12 +5,15 @@ commands:
    warn:
        description: Send a warn to an online or offline player
        default: op
+       usage: /warn [player] [reason]
    checkwarns:
        description: Check your warns
        default: true
+       usage: /warn (player)
    adminwarn:
        description: Access admin management for IngotWarn
        default: op
+       usage: /warn [command] (player) (index)
 permissions:
    ingotwarn.warn:
       description: Gives access to the warn command
