@@ -33,3 +33,4 @@ PLANNED FEATURES:
 
 - Alert players that were warned offline when they rejoin
 - Execute commands on a given warn amount
+- Check if player changed their username and copy over their data if they have
