@@ -26,15 +26,23 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class main extends JavaPlugin implements Listener { 
     //used if the given file isnt in another folder
     final String ROOT = "";
-    //imports file class
-    InstanceData getdata = new InstanceData();
     /*
-    * Enables the plugin.
-    * Checks if MC version isn't the latest.
-    * If its not, warn the player about lacking support
-    * Checks if server is running offline mode
-    * If it is, disable the plugin
-    * Also checks for dependencies and loads commands
+    * THis method is used to read and write to a given file
+    * Also handles YML loading
+    */
+    public YamlConfiguration getCustomData(Plugin plugin, String filename, String path) {
+        //check if folder is a thing
+        if (!plugin.getDataFolder().exists())
+        {
+            plugin.getDataFolder().mkdir();
+        }
+         //check if file broke somehow
+        File file = new File(plugin.getDataFolder() + "/" + path, filename + ".yml");
+        //load
+        return YamlConfiguration.loadConfiguration(file);
+    }
+    /*
+    * This method creates files if needed
     */
     private void createFiles() {
         File configf = new File(getDataFolder(), "config.yml");
@@ -81,16 +89,20 @@ public class main extends JavaPlugin implements Listener {
         return plugin;
     }
     /*
-    * Enables the plugin
+    * Enables the plugin.
+    * Checks if MC version isn't the latest.
+    * If its not, warn the player about lacking support
+    * Checks if server is running offline mode
+    * If it is, disable the plugin
+    * Also checks for dependencies and loads commands
     */
     @Override
     public void onEnable() {
+        //creates files if needed
         plugin = this;
         createFiles();
         //imports files
-        FileConfiguration config = getdata.getCustomData(plugin,"config",ROOT);
-        FileConfiguration language = getdata.getCustomData(plugin,"language",ROOT);
-        FileConfiguration pd = getdata.getCustomData(plugin,"playerdata",ROOT);
+        FileConfiguration language = this.getCustomData(plugin,"language",ROOT);
         //language variables)
         String prefixMessage = ChatColor.translateAlternateColorCodes('&', language.getString("Prefix-Message")); 
         String unsupportedVersionAMessage = ChatColor.translateAlternateColorCodes('&', language.getString("Unsupported-VersionA-Message")); 
@@ -131,15 +143,15 @@ public class main extends JavaPlugin implements Listener {
     public void onPlayerJoin(PlayerJoinEvent event) throws IOException {
         //imports files
         Plugin plugin = getServer().getPluginManager().getPlugin("IngotWarn");
-        FileConfiguration language = getdata.getCustomData(plugin,"language",ROOT);
-        FileConfiguration pd = getdata.getCustomData(plugin,"playerdata",ROOT);
+        FileConfiguration language = this.getCustomData(plugin,"language",ROOT);
+        FileConfiguration pd = this.getCustomData(plugin,"playerdata",ROOT);
         File playerdataf = new File("plugins/IngotWarn","playerdata.yml");
         //language
         String prefixMessage = ChatColor.translateAlternateColorCodes('&', language.getString("Prefix-Message")); 
         String newPlayerMessage = ChatColor.translateAlternateColorCodes('&', language.getString("New-Player-Message")); 
         //converts username back into an actual string, since "toString()" leaves useless junk that messes things up
         Player username = event.getPlayer();
-        String usernameString = getdata.convertUsername(username);
+        String usernameString = username.getName();
         if (pd.getString(usernameString) == null) {
             //create section
             pd.createSection(usernameString);
@@ -162,9 +174,9 @@ public class main extends JavaPlugin implements Listener {
         File configf = new File("plugins/IngotWarn","config.yml");
         File languagef = new File("plugins/IngotWarn","language.yml");
         File playerdataf = new File("plugins/IngotWarn","playerdata.yml");
-        FileConfiguration config = getdata.getCustomData(plugin,"config",ROOT);
-        FileConfiguration language = getdata.getCustomData(plugin,"language",ROOT);
-        FileConfiguration pd = getdata.getCustomData(plugin,"playerdata",ROOT);
+        FileConfiguration config = this.getCustomData(plugin,"config",ROOT);
+        FileConfiguration language = this.getCustomData(plugin,"language",ROOT);
+        FileConfiguration pd = this.getCustomData(plugin,"playerdata",ROOT);
         //language
         String prefixMessage = ChatColor.translateAlternateColorCodes('&', language.getString("Prefix-Message")); 
         String pluginDisabledMessage = ChatColor.translateAlternateColorCodes('&', language.getString("Plugin-Disabled-Message")); 

@@ -36,6 +36,7 @@ public class AdminWarn implements TabExecutor {
     //used if the given file isnt in another folder
     final String ROOT = "";
     //retrive plugin instance
+    main getdata = new main();
     Plugin plugin = main.getInstance();
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
@@ -43,7 +44,6 @@ public class AdminWarn implements TabExecutor {
         File configf = new File(plugin.getDataFolder(),"config.yml");
         File languagef = new File(plugin.getDataFolder(),"language.yml");
         File playerdataf = new File(plugin.getDataFolder(),"playerdata.yml");
-        InstanceData getdata = new InstanceData();
         FileConfiguration config = getdata.getCustomData(plugin, "config", ROOT);
         FileConfiguration language = getdata.getCustomData(plugin, "language", ROOT);
         FileConfiguration pd = getdata.getCustomData(plugin, "playerdata", ROOT);
@@ -260,7 +260,6 @@ public class AdminWarn implements TabExecutor {
         }
         //used to retrive indexes for edit and delete commands
         if (args.length == 3 && (args[0].equalsIgnoreCase("edit") || args[0].equalsIgnoreCase("delete"))) {
-            InstanceData getdata = new InstanceData();
             FileConfiguration config = getdata.getCustomData(plugin, "config", ROOT);
             FileConfiguration pd = getdata.getCustomData(plugin, "playerdata", ROOT);
             List<String> arguments = new ArrayList<>();

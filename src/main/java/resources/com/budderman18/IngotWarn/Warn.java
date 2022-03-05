@@ -25,7 +25,7 @@ public class Warn implements TabExecutor {
     final String ROOT = "";
     //imports files
     File playerdataf = new File("plugins/IngotWarn","playerdata.yml");
-    InstanceData getdata = new InstanceData();
+    main getdata = new main();
     //warn variables
     byte warnNumber = 0;
     @Override
@@ -56,7 +56,7 @@ public class Warn implements TabExecutor {
                 String usernameString = args[0];
                 //check if entered username has data
                 if (pd.getConfigurationSection(usernameString) != null) {
-                    //converts username back into an actual string, since "toString()" leaves useless junk that messes things up
+                    //retrives username
                     String player = args[0];
                     Player target;
                     //check if no reason is entered

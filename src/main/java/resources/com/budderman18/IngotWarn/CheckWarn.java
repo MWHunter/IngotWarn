@@ -18,7 +18,7 @@ public class CheckWarn implements TabExecutor {
     //used if the given file isnt in another folder
     final String ROOT = "";
     //imports files
-    InstanceData getdata = new InstanceData();
+    main getdata = new main();
     FileConfiguration config = getdata.getCustomData(plugin,"config",ROOT);
     FileConfiguration language = getdata.getCustomData(plugin,"language",ROOT);
     /**
@@ -50,10 +50,10 @@ public class CheckWarn implements TabExecutor {
             if (args.length == 0) {
                 //check if sender is a player
                 if ((sender instanceof Player)) {
-                    //converts username back into an actual string, since "toString()" leaves useless junk that messes things up
+                    //gets sender's username
                     String player = Bukkit.getServer().getPlayer(sender.getName()).getName();
                     Player username = Bukkit.getPlayer(player);
-                    String usernameString = getdata.convertUsername(username);
+                    String usernameString = username.getName();
                     //check for permission
                     if (sender.hasPermission("ingotwarn.checkwarns")) {
                         //outputs userfile
