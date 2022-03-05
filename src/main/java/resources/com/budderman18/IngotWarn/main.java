@@ -8,6 +8,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -26,21 +27,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class main extends JavaPlugin implements Listener { 
     //used if the given file isnt in another folder
     final String ROOT = "";
-    /*
-    * THis method is used to read and write to a given file
-    * Also handles YML loading
-    */
-    public YamlConfiguration getCustomData(Plugin plugin, String filename, String path) {
-        //check if folder is a thing
-        if (!plugin.getDataFolder().exists())
-        {
-            plugin.getDataFolder().mkdir();
-        }
-         //check if file broke somehow
-        File file = new File(plugin.getDataFolder() + "/" + path, filename + ".yml");
-        //load
-        return YamlConfiguration.loadConfiguration(file);
-    }
+    ConsoleCommandSender sender = getServer().getConsoleSender();
     /*
     * This method creates files if needed
     */
@@ -88,6 +75,8 @@ public class main extends JavaPlugin implements Listener {
     public static main getInstance() {
         return plugin;
     }
+    
+    AdminWarn getdata = new AdminWarn();
     /*
     * Enables the plugin.
     * Checks if MC version isn't the latest.
@@ -102,7 +91,7 @@ public class main extends JavaPlugin implements Listener {
         plugin = this;
         createFiles();
         //imports files
-        FileConfiguration language = this.getCustomData(plugin,"language",ROOT);
+        FileConfiguration language = getdata.getCustomData(plugin,"language",ROOT);
         //language variables)
         String prefixMessage = ChatColor.translateAlternateColorCodes('&', language.getString("Prefix-Message")); 
         String unsupportedVersionAMessage = ChatColor.translateAlternateColorCodes('&', language.getString("Unsupported-VersionA-Message")); 
@@ -114,18 +103,18 @@ public class main extends JavaPlugin implements Listener {
         String pluginEnabledMessage = ChatColor.translateAlternateColorCodes('&', language.getString("Plugin-Enabled-Message")); 
         //check for correct version
         if (!(Bukkit.getVersion().contains("1.18.2"))) {
-            getServer().getConsoleSender().sendMessage(prefixMessage + unsupportedVersionAMessage);
-            getServer().getConsoleSender().sendMessage(prefixMessage + unsupportedVersionBMessage);
-            getServer().getConsoleSender().sendMessage(prefixMessage + unsupportedVersionCMessage);
+            sender.sendMessage(prefixMessage + unsupportedVersionAMessage);
+            sender.sendMessage(prefixMessage + unsupportedVersionBMessage);
+            sender.sendMessage(prefixMessage + unsupportedVersionCMessage);
             return;   
         }
         //check for online mode
-        if (!(getServer().getOnlineMode())) {
-            getServer().getConsoleSender().sendMessage(prefixMessage + unsecureServerAMessage);
-            getServer().getConsoleSender().sendMessage(prefixMessage + unsecureServerBMessage);
-            getServer().getConsoleSender().sendMessage(prefixMessage + unsecureServerCMessage);
-            getServer().getPluginManager().disablePlugin(this);
-        }
+        //if (!(getServer().getOnlineMode())) {
+        //    sender.sendMessage(prefixMessage + unsecureServerAMessage);
+        //    sender.sendMessage(prefixMessage + unsecureServerBMessage);
+        //    sender.sendMessage(prefixMessage + unsecureServerCMessage);
+        //    getServer().getPluginManager().disablePlugin(this);
+        //}
         //commands
         this.getCommand("warn").setExecutor(new Warn());
         this.getCommand("checkwarns").setExecutor(new CheckWarn());
@@ -133,33 +122,64 @@ public class main extends JavaPlugin implements Listener {
         //events
         getServer().getPluginManager().registerEvents(this,this);
         getServer().getPluginManager().enablePlugin(this);
-        getServer().getConsoleSender().sendMessage(prefixMessage + pluginEnabledMessage);
+        sender.sendMessage(prefixMessage + pluginEnabledMessage);
     }
     /*
     * This method creates playerdata when someone new joins
     * In the future, it'll alert players where werent online when warned
     */
     @EventHandler(priority = EventPriority.HIGHEST)
-    public void onPlayerJoin(PlayerJoinEvent event) throws IOException {
+    public void createUserData(PlayerJoinEvent event) throws IOException {
         //imports files
         Plugin plugin = getServer().getPluginManager().getPlugin("IngotWarn");
-        FileConfiguration language = this.getCustomData(plugin,"language",ROOT);
-        FileConfiguration pd = this.getCustomData(plugin,"playerdata",ROOT);
+        FileConfiguration config = getdata.getCustomData(plugin,"config",ROOT);
+        FileConfiguration language = getdata.getCustomData(plugin,"language",ROOT);
+        FileConfiguration pd = getdata.getCustomData(plugin,"playerdata",ROOT);
         File playerdataf = new File("plugins/IngotWarn","playerdata.yml");
         //language
         String prefixMessage = ChatColor.translateAlternateColorCodes('&', language.getString("Prefix-Message")); 
         String newPlayerMessage = ChatColor.translateAlternateColorCodes('&', language.getString("New-Player-Message")); 
+        String playerExistsMessage = ChatColor.translateAlternateColorCodes('&', language.getString("Player-Exists-Message")); 
         //converts username back into an actual string, since "toString()" leaves useless junk that messes things up
         Player username = event.getPlayer();
         String usernameString = username.getName();
+        boolean exists = false;
+        String tempusername = null;
+        //check if joined user has data
         if (pd.getString(usernameString) == null) {
+            //tell console
+            sender.sendMessage(prefixMessage + newPlayerMessage);
+            //check if joined player's UUID already is in the data
+            for (String key : pd.getKeys(false)) {
+                if (pd.getString(key + ".UUID").equals(username.getUniqueId().toString())) {
+                    tempusername = key;
+                    //skip fresh generation
+                    exists = true;
+                }
+            }
             //create section
             pd.createSection(usernameString);
-            //tell console
-            getServer().getConsoleSender().sendMessage(prefixMessage + newPlayerMessage);
-            //generate UUID section
-            UUID uuid = username.getUniqueId();
-            pd.set(usernameString+".UUID",uuid.toString());
+            if (exists == true) {
+                //tell console
+                sender.sendMessage(prefixMessage + playerExistsMessage);
+                //copy over old data to new data
+                byte maxWarns = (byte) Integer.parseInt(config.getString("Max-Warns"));
+                pd.set(usernameString + ".UUID", pd.getString(tempusername + ".UUID"));
+                for (byte i = 1; i < maxWarns + 1; i++) {
+                    if (pd.get(tempusername + ".Warn" + i) != null) {
+                        pd.set(usernameString + ".Warn" + i, pd.getString(tempusername + ".Warn" + i));
+                    } else {
+                        i = maxWarns;
+                    }
+                }
+                sender.sendMessage("Done!");
+            }
+            //check if no data exists
+            if (exists == false) {
+                //generate UUID section
+                UUID uuid = username.getUniqueId();
+                pd.set(usernameString + ".UUID", uuid.toString());
+            }
             //saves file 
             pd.save(playerdataf);
         }
@@ -174,9 +194,9 @@ public class main extends JavaPlugin implements Listener {
         File configf = new File("plugins/IngotWarn","config.yml");
         File languagef = new File("plugins/IngotWarn","language.yml");
         File playerdataf = new File("plugins/IngotWarn","playerdata.yml");
-        FileConfiguration config = this.getCustomData(plugin,"config",ROOT);
-        FileConfiguration language = this.getCustomData(plugin,"language",ROOT);
-        FileConfiguration pd = this.getCustomData(plugin,"playerdata",ROOT);
+        FileConfiguration config = getdata.getCustomData(plugin,"config",ROOT);
+        FileConfiguration language = getdata.getCustomData(plugin,"language",ROOT);
+        FileConfiguration pd = getdata.getCustomData(plugin,"playerdata",ROOT);
         //language
         String prefixMessage = ChatColor.translateAlternateColorCodes('&', language.getString("Prefix-Message")); 
         String pluginDisabledMessage = ChatColor.translateAlternateColorCodes('&', language.getString("Plugin-Disabled-Message")); 
@@ -201,6 +221,6 @@ public class main extends JavaPlugin implements Listener {
         }
         //disables plugin
         getServer().getPluginManager().disablePlugin(this);
-        getServer().getConsoleSender().sendMessage(prefixMessage + pluginDisabledMessage);
+        sender.sendMessage(prefixMessage + pluginDisabledMessage);
     }
 }

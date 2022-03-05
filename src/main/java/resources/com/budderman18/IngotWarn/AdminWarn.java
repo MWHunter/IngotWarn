@@ -13,12 +13,28 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
 
 /**
  * This class handles the adminwarns command
  */
 public class AdminWarn implements TabExecutor {
+    /*
+    * THis method is used to read and write to a given file
+    * Also handles YML loading
+    */
+    public YamlConfiguration getCustomData(Plugin plugin, String filename, String path) {
+        //check if folder is a thing
+        if (!plugin.getDataFolder().exists())
+        {
+            plugin.getDataFolder().mkdir();
+        }
+         //check if file broke somehow
+        File file = new File(plugin.getDataFolder() + "/" + path, filename + ".yml");
+        //load
+        return YamlConfiguration.loadConfiguration(file);
+    }
     /**
      * This method handles everything related to the adminwarns command
      * TabCompletion has its own method
@@ -36,7 +52,6 @@ public class AdminWarn implements TabExecutor {
     //used if the given file isnt in another folder
     final String ROOT = "";
     //retrive plugin instance
-    main getdata = new main();
     Plugin plugin = main.getInstance();
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
@@ -44,16 +59,17 @@ public class AdminWarn implements TabExecutor {
         File configf = new File(plugin.getDataFolder(),"config.yml");
         File languagef = new File(plugin.getDataFolder(),"language.yml");
         File playerdataf = new File(plugin.getDataFolder(),"playerdata.yml");
-        FileConfiguration config = getdata.getCustomData(plugin, "config", ROOT);
-        FileConfiguration language = getdata.getCustomData(plugin, "language", ROOT);
-        FileConfiguration pd = getdata.getCustomData(plugin, "playerdata", ROOT);
+        FileConfiguration config = this.getCustomData(plugin, "config", ROOT);
+        FileConfiguration language = this.getCustomData(plugin, "language", ROOT);
+        FileConfiguration pd = this.getCustomData(plugin, "playerdata", ROOT);
         //import version
         String version = config.getString("version");
         //import maxwarns
         byte maxWarns = (byte) Integer.parseInt(config.getString("Max-Warns"));
         //language
         String prefixMessage = ChatColor.translateAlternateColorCodes('&', language.getString("Prefix-Message"));
-        String versionMessage = ChatColor.translateAlternateColorCodes('&', language.getString("Version-Message"));
+        String versionMessage1 = ChatColor.translateAlternateColorCodes('&', language.getString("Version-Message-1"));
+        String versionMessage2 = ChatColor.translateAlternateColorCodes('&', language.getString("Version-Message-2"));
         String reloadMessage = ChatColor.translateAlternateColorCodes('&', language.getString("Reload-Message"));
         String noPermissionMessage = ChatColor.translateAlternateColorCodes('&', language.getString("No-Permission-Message"));
         String incorrectCommandMessage = ChatColor.translateAlternateColorCodes('&', language.getString("Incorrect-Command-Message"));
@@ -190,7 +206,8 @@ public class AdminWarn implements TabExecutor {
                     }
                     //version command
                     if (args[0].equalsIgnoreCase("version")) {
-                        sender.sendMessage(prefixMessage + versionMessage + version);
+                        sender.sendMessage(prefixMessage + versionMessage1 + version);
+                        sender.sendMessage(prefixMessage + versionMessage2);
                         return true;
                     }
                     //reload command
@@ -260,8 +277,8 @@ public class AdminWarn implements TabExecutor {
         }
         //used to retrive indexes for edit and delete commands
         if (args.length == 3 && (args[0].equalsIgnoreCase("edit") || args[0].equalsIgnoreCase("delete"))) {
-            FileConfiguration config = getdata.getCustomData(plugin, "config", ROOT);
-            FileConfiguration pd = getdata.getCustomData(plugin, "playerdata", ROOT);
+            FileConfiguration config = this.getCustomData(plugin, "config", ROOT);
+            FileConfiguration pd = this.getCustomData(plugin, "playerdata", ROOT);
             List<String> arguments = new ArrayList<>();
             String usernameString;
             String warnNumberString;

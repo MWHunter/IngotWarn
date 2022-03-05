@@ -25,7 +25,7 @@ public class Warn implements TabExecutor {
     final String ROOT = "";
     //imports files
     File playerdataf = new File("plugins/IngotWarn","playerdata.yml");
-    main getdata = new main();
+    AdminWarn getdata = new AdminWarn();
     //warn variables
     byte warnNumber = 0;
     @Override

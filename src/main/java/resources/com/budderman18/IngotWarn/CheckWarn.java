@@ -18,7 +18,7 @@ public class CheckWarn implements TabExecutor {
     //used if the given file isnt in another folder
     final String ROOT = "";
     //imports files
-    main getdata = new main();
+    AdminWarn getdata = new AdminWarn();
     FileConfiguration config = getdata.getCustomData(plugin,"config",ROOT);
     FileConfiguration language = getdata.getCustomData(plugin,"language",ROOT);
     /**
