@@ -14,6 +14,8 @@ import org.bukkit.entity.Player;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import static org.bukkit.Bukkit.getServer;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.plugin.Plugin;
 /**
  * This class handles the warn command
@@ -30,12 +32,14 @@ public class Warn implements TabExecutor {
     byte warnNumber = 0;
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+        ConsoleCommandSender csender = getServer().getConsoleSender();
         //files
         FileConfiguration config = getdata.getCustomData(plugin,"config",ROOT);
         FileConfiguration language = getdata.getCustomData(plugin,"language",ROOT);
         FileConfiguration pd = getdata.getCustomData(plugin,"playerdata",ROOT);
         //max warns
         byte maxWarns = (byte) Integer.parseInt(config.getString("Max-Warns"));
+        boolean isNotified = false;
         //language variables
         String prefixMessage = ChatColor.translateAlternateColorCodes('&', language.getString("Prefix-Message")); 
         String incorrectCommandMessage = ChatColor.translateAlternateColorCodes('&', language.getString("Incorrect-Command-Message"));
@@ -71,7 +75,7 @@ public class Warn implements TabExecutor {
                         warnReason = String.join(" ", split);
                         //gets current warn count
                         for (byte i = 1; i <= (maxWarns); i++) {
-                            if ((pd.getString(usernameString + ".Warn" + i) == null) || (pd.getString(usernameString + ".Warn" + i) == "")) {
+                            if ((pd.getString(usernameString + ".Warn" + i + ".Message") == null) || (pd.getString(usernameString + ".Warn" + i + ".Message") == "")) {
                                 warnNumber = i;
                                 i = maxWarns;
                             }
@@ -83,6 +87,7 @@ public class Warn implements TabExecutor {
                             if (Bukkit.getServer().getPlayer(args[0]) != null) {
                                 target = Bukkit.getServer().getPlayer(args[0]);
                                 target.sendMessage(warnedMessage + warnReason);
+                                isNotified = true;
                             }
                             //set warn number
                             String warnNumberString = "Warn" + (warnNumber-1);
@@ -96,8 +101,34 @@ public class Warn implements TabExecutor {
                             }
                             //update file
                             if ((warnNumber <= maxWarns) && (warnNumber > 0)) {
-                                pd.set(usernameString + '.' + warnNumberString, warnReason);
+                                pd.set(usernameString + '.' + warnNumberString + ".Message", warnReason);
+                                pd.set(usernameString + '.' + warnNumberString + '.' + "isNotified", Boolean.toString(isNotified));
                             }
+                            //execute commands
+                            for (byte i = (byte) (warnNumber-2); i < 127; i++) {
+                                if (config.getString("Commands.Warn" + i) != null) {
+                                    for (byte j = 1; j < 127; j++) {
+                                        if (config.getString("Commands.Warn" + i + ".Command" + j) != null) {
+                                            String command = config.getString("Commands.Warn" + i + ".Command" + j);
+                                            if (command.contains("%player%")) {
+                                                command = command.replaceAll("%player%", usernameString);
+                                            }
+                                            if (command.contains("%target%")) {
+                                                command = command.replaceAll("%target%", sender.getName());
+                                            }
+                                            getServer().dispatchCommand(csender, command);
+                                        }
+                                        else {
+                                            j = 126;
+                                            i = 126;
+                                        }
+                                    }
+                                }
+                                else {
+                                    i = 126;
+                                }
+                            }
+                            //save file
                             try {
                                 pd.save(playerdataf);
                             } 
