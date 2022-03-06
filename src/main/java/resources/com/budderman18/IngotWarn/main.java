@@ -28,6 +28,18 @@ public class main extends JavaPlugin implements Listener {
     //used if the given file isnt in another folder
     final String ROOT = "";
     ConsoleCommandSender sender = getServer().getConsoleSender();
+    //retrive plugin instance
+    private static main plugin;
+    
+    public static main getInstance() {
+        return plugin;
+    }
+    
+    AdminWarn getdata = new AdminWarn();
+    //import files
+    File configf = new File("plugins/IngotWarn","config.yml");
+    File languagef = new File("plugins/IngotWarn","language.yml");
+    File playerdataf = new File("plugins/IngotWarn","playerdata.yml");
     /*
     * This method creates files if needed
     */
@@ -69,14 +81,6 @@ public class main extends JavaPlugin implements Listener {
             e.printStackTrace();
         }
     } 
-    //retrive plugin instance
-    private static main plugin;
-    
-    public static main getInstance() {
-        return plugin;
-    }
-    
-    AdminWarn getdata = new AdminWarn();
     /*
     * Enables the plugin.
     * Checks if MC version isn't the latest.
@@ -88,9 +92,9 @@ public class main extends JavaPlugin implements Listener {
     @Override
     public void onEnable() {
         //creates files if needed
-        plugin = this;
         createFiles();
-        //imports files
+        //import files
+        plugin = this;
         FileConfiguration language = getdata.getCustomData(plugin,"language",ROOT);
         //language variables)
         String prefixMessage = ChatColor.translateAlternateColorCodes('&', language.getString("Prefix-Message")); 
@@ -109,12 +113,12 @@ public class main extends JavaPlugin implements Listener {
             return;   
         }
         //check for online mode
-        //if (!(getServer().getOnlineMode())) {
-        //    sender.sendMessage(prefixMessage + unsecureServerAMessage);
-        //    sender.sendMessage(prefixMessage + unsecureServerBMessage);
-        //    sender.sendMessage(prefixMessage + unsecureServerCMessage);
-        //    getServer().getPluginManager().disablePlugin(this);
-        //}
+        if (!(getServer().getOnlineMode())) {
+            sender.sendMessage(prefixMessage + unsecureServerAMessage);
+            sender.sendMessage(prefixMessage + unsecureServerBMessage);
+            sender.sendMessage(prefixMessage + unsecureServerCMessage);
+            getServer().getPluginManager().disablePlugin(this);
+        }
         //commands
         this.getCommand("warn").setExecutor(new Warn());
         this.getCommand("checkwarns").setExecutor(new CheckWarn());
@@ -131,16 +135,15 @@ public class main extends JavaPlugin implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void createUserData(PlayerJoinEvent event) throws IOException {
         //imports files
-        Plugin plugin = getServer().getPluginManager().getPlugin("IngotWarn");
+        plugin = this;
         FileConfiguration config = getdata.getCustomData(plugin,"config",ROOT);
         FileConfiguration language = getdata.getCustomData(plugin,"language",ROOT);
         FileConfiguration pd = getdata.getCustomData(plugin,"playerdata",ROOT);
-        File playerdataf = new File("plugins/IngotWarn","playerdata.yml");
         //language
         String prefixMessage = ChatColor.translateAlternateColorCodes('&', language.getString("Prefix-Message")); 
         String newPlayerMessage = ChatColor.translateAlternateColorCodes('&', language.getString("New-Player-Message")); 
         String playerExistsMessage = ChatColor.translateAlternateColorCodes('&', language.getString("Player-Exists-Message")); 
-        //converts username back into an actual string, since "toString()" leaves useless junk that messes things up
+        //converts username back into a string
         Player username = event.getPlayer();
         String usernameString = username.getName();
         boolean exists = false;
@@ -185,18 +188,40 @@ public class main extends JavaPlugin implements Listener {
         }
     }
     /*
+    * This method checks if the joined player was notified for all their warns
+    * Useful for offline warns
+    */
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void warnOfflinePlayers(PlayerJoinEvent event) throws IOException {
+        plugin = this;
+        FileConfiguration config = getdata.getCustomData(plugin,"config",ROOT);
+        FileConfiguration language = getdata.getCustomData(plugin,"language",ROOT);
+        FileConfiguration pd = getdata.getCustomData(plugin,"playerdata",ROOT);
+        //language
+        String warnedMessage = ChatColor.translateAlternateColorCodes('&', language.getString("Warned-Player-Message"));
+        byte maxWarns = (byte) Integer.parseInt(config.getString("Max-Warns"));
+        String usernameString = event.getPlayer().getName();
+        for (byte i=1; i < maxWarns + 1; i++) {
+            if ("false".equals(pd.getString(usernameString + ".Warn" + i + ".isNotified"))) {
+                Player target = event.getPlayer();
+                String warnReason = pd.getString(usernameString + ".Warn" + i + ".Message");
+                target.sendMessage(warnedMessage + warnReason);
+                pd.set(usernameString + ".Warn" + i + ".isNotified", "true");
+                //saves file 
+                pd.save(playerdataf);
+            }
+        }
+    }
+    /*
     * Disables the plugin.
     */
     @Override
     public void onDisable() {
-        //imports files
-        Plugin plugin = getServer().getPluginManager().getPlugin("IngotWarn");
-        File configf = new File("plugins/IngotWarn","config.yml");
-        File languagef = new File("plugins/IngotWarn","language.yml");
-        File playerdataf = new File("plugins/IngotWarn","playerdata.yml");
-        FileConfiguration config = getdata.getCustomData(plugin,"config",ROOT);
-        FileConfiguration language = getdata.getCustomData(plugin,"language",ROOT);
-        FileConfiguration pd = getdata.getCustomData(plugin,"playerdata",ROOT);
+        plugin = this;
+        //import files
+        FileConfiguration config = getdata.getCustomData(plugin, "config", ROOT);
+        FileConfiguration language = getdata.getCustomData(plugin, "language", ROOT);
+        FileConfiguration pd = getdata.getCustomData(plugin, "playerdata", ROOT);
         //language
         String prefixMessage = ChatColor.translateAlternateColorCodes('&', language.getString("Prefix-Message")); 
         String pluginDisabledMessage = ChatColor.translateAlternateColorCodes('&', language.getString("Plugin-Disabled-Message")); 
