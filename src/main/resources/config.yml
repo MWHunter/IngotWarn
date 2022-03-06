@@ -1,6 +1,14 @@
 #dont touch
-version: "1.0"
+version: "1.1"
 #Changes how many warns a user can have
 #Note that the bigger the number, the faster the playerdata.yml will fill up
 #Max length of 127
 Max-Warns: "10"
+# Execute commands on a given warn count!
+# You can add as may as you'd like! just follow the format
+# You can change these in-game with /adminwarn commands
+# You must put them in numeric order or some commands may not send!
+# use %player% for the player's username. use %target% for the sender's username
+# Warnx: <--- X is what warn number you want the command to occur on
+#  Commandx <--- X is the number for the command. Keep it in numeric order, as that's the order they will execute in. Max amount of commands is 126
+Commands:

@@ -1,3 +1,7 @@
+#don't change this
+Version: "1.1"
 #Name:
 #  UUID:
-#  Warnx: warnhere
+#  Warnx: <-- X is the warn number you're on. Stay in numeric order or it will break things
+#    Message: <-- message here
+#    isNotfified: <-- weather the player knows they've been warned
