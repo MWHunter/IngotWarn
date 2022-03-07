@@ -17,7 +17,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
 /**
@@ -95,7 +94,36 @@ public class main extends JavaPlugin implements Listener {
         createFiles();
         //import files
         plugin = this;
+        FileConfiguration config = getdata.getCustomData(plugin,"config",ROOT);
         FileConfiguration language = getdata.getCustomData(plugin,"language",ROOT);
+        FileConfiguration pd = getdata.getCustomData(plugin,"playerdata",ROOT);
+        //language updater variables
+        String outdatedConfigMessage = ChatColor.translateAlternateColorCodes('&', "&4OUTDATED CONFIG!!!! &bConverting to newest format...");
+        String outdatedLanguageMessage = ChatColor.translateAlternateColorCodes('&', "&4OUTDATED LANGUAGE!!!! &bConverting to newest format...");
+        String outdatedPlayerDataMessage = ChatColor.translateAlternateColorCodes('&', "&4OUTDATED PLAYERDATA!!!! &bConverting to newest format...");
+        if (language.getString("Outdated-Config-Message") != null) {
+            outdatedConfigMessage = ChatColor.translateAlternateColorCodes('&', language.getString("Outdated-Config-Message"));
+        }
+        if (language.getString("Outdated-Language-Message") != null) {
+            outdatedLanguageMessage = ChatColor.translateAlternateColorCodes('&', language.getString("Outdated-Language-Message"));
+        }
+        if (language.getString("Outdated-Player-Data-Message") != null) {
+            outdatedPlayerDataMessage = ChatColor.translateAlternateColorCodes('&', language.getString("Outdated-Player-Data-Message"));
+        } 
+        //check for versions
+        FileUpdater update = new FileUpdater();
+        if (!"1.1".equals(config.getString("version"))) {
+            sender.sendMessage(outdatedConfigMessage);
+            update.updateConfig();
+        }
+        if (!"1.1".equals(language.getString("version"))) {
+            sender.sendMessage(outdatedLanguageMessage);
+            update.updateLanguage();
+        }
+        if (!"1.1".equals(pd.getString("version"))) {
+            sender.sendMessage(outdatedPlayerDataMessage);
+            update.updatePlayerData();
+        }
         //language variables)
         String prefixMessage = ChatColor.translateAlternateColorCodes('&', language.getString("Prefix-Message")); 
         String unsupportedVersionAMessage = ChatColor.translateAlternateColorCodes('&', language.getString("Unsupported-VersionA-Message")); 
