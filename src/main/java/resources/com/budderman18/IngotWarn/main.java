@@ -188,7 +188,6 @@ public class main extends JavaPlugin implements Listener {
                 catch (NullPointerException ex) {
                     checkable = false;
                 }
-                sender.sendMessage(Boolean.toString(checkable));
                 if (checkable == true) {
                     if (pd.getString(key + ".UUID").equals(username.getUniqueId().toString())) {
                         tempusername = key;
