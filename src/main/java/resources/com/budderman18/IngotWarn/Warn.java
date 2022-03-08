@@ -27,7 +27,7 @@ public class Warn implements TabExecutor {
     final String ROOT = "";
     //imports files
     File playerdataf = new File("plugins/IngotWarn","playerdata.yml");
-    AdminWarn getdata = new AdminWarn();
+    FileUpdater getdata = new FileUpdater();
     //warn variables
     byte warnNumber = 0;
     @Override
@@ -102,7 +102,7 @@ public class Warn implements TabExecutor {
                             //update file
                             if ((warnNumber <= maxWarns) && (warnNumber > 0)) {
                                 pd.set(usernameString + '.' + warnNumberString + ".Message", warnReason);
-                                pd.set(usernameString + '.' + warnNumberString + '.' + "isNotified", Boolean.toString(isNotified));
+                                pd.set(usernameString + '.' + warnNumberString + '.' + "isNotified", isNotified);
                             }
                             //execute commands
                             for (byte i = (byte) (warnNumber-2); i < 127; i++) {

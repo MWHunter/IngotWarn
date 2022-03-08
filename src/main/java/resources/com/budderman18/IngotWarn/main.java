@@ -34,11 +34,7 @@ public class main extends JavaPlugin implements Listener {
         return plugin;
     }
     
-    AdminWarn getdata = new AdminWarn();
-    //import files
-    File configf = new File("plugins/IngotWarn","config.yml");
-    File languagef = new File("plugins/IngotWarn","language.yml");
-    File playerdataf = new File("plugins/IngotWarn","playerdata.yml");
+
     /*
     * This method creates files if needed
     */
@@ -92,8 +88,10 @@ public class main extends JavaPlugin implements Listener {
     public void onEnable() {
         //creates files if needed
         createFiles();
-        //import files
+        getServer().getPluginManager().enablePlugin(this);
         plugin = this;
+        FileUpdater getdata = new FileUpdater();
+        //import files
         FileConfiguration config = getdata.getCustomData(plugin,"config",ROOT);
         FileConfiguration language = getdata.getCustomData(plugin,"language",ROOT);
         FileConfiguration pd = getdata.getCustomData(plugin,"playerdata",ROOT);
@@ -153,7 +151,6 @@ public class main extends JavaPlugin implements Listener {
         this.getCommand("adminwarn").setExecutor(new AdminWarn());
         //events
         getServer().getPluginManager().registerEvents(this,this);
-        getServer().getPluginManager().enablePlugin(this);
         sender.sendMessage(prefixMessage + pluginEnabledMessage);
     }
     /*
@@ -162,8 +159,10 @@ public class main extends JavaPlugin implements Listener {
     */
     @EventHandler(priority = EventPriority.HIGHEST)
     public void createUserData(PlayerJoinEvent event) throws IOException {
-        //imports files
+        FileUpdater getdata = new FileUpdater();
         plugin = this;
+        //import files
+        File playerdataf = new File("plugins/IngotWarn","playerdata.yml");
         FileConfiguration config = getdata.getCustomData(plugin,"config",ROOT);
         FileConfiguration language = getdata.getCustomData(plugin,"language",ROOT);
         FileConfiguration pd = getdata.getCustomData(plugin,"playerdata",ROOT);
@@ -175,6 +174,7 @@ public class main extends JavaPlugin implements Listener {
         Player username = event.getPlayer();
         String usernameString = username.getName();
         boolean exists = false;
+        boolean checkable = true;
         String tempusername = null;
         //check if joined user has data
         if (pd.getString(usernameString) == null) {
@@ -182,10 +182,19 @@ public class main extends JavaPlugin implements Listener {
             sender.sendMessage(prefixMessage + newPlayerMessage);
             //check if joined player's UUID already is in the data
             for (String key : pd.getKeys(false)) {
-                if (pd.getString(key + ".UUID").equals(username.getUniqueId().toString())) {
-                    tempusername = key;
-                    //skip fresh generation
-                    exists = true;
+                try {
+                    pd.getString(key + ".UUID").equals(username.getUniqueId().toString());
+                }
+                catch (NullPointerException ex) {
+                    checkable = false;
+                }
+                sender.sendMessage(Boolean.toString(checkable));
+                if (checkable == true) {
+                    if (pd.getString(key + ".UUID").equals(username.getUniqueId().toString())) {
+                        tempusername = key;
+                        //skip fresh generation
+                        exists = true;
+                    }
                 }
             }
             //create section
@@ -222,6 +231,9 @@ public class main extends JavaPlugin implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void warnOfflinePlayers(PlayerJoinEvent event) throws IOException {
         plugin = this;
+        FileUpdater getdata = new FileUpdater();
+        //import files
+        File playerdataf = new File("plugins/IngotWarn","playerdata.yml");
         FileConfiguration config = getdata.getCustomData(plugin,"config",ROOT);
         FileConfiguration language = getdata.getCustomData(plugin,"language",ROOT);
         FileConfiguration pd = getdata.getCustomData(plugin,"playerdata",ROOT);
@@ -230,12 +242,12 @@ public class main extends JavaPlugin implements Listener {
         byte maxWarns = (byte) Integer.parseInt(config.getString("Max-Warns"));
         String usernameString = event.getPlayer().getName();
         for (byte i=1; i < maxWarns + 1; i++) {
-            if ("false".equals(pd.getString(usernameString + ".Warn" + i + ".isNotified"))) {
+            if ((pd.get(usernameString + ".Warn" + i) != null && pd.getBoolean(usernameString + ".Warn" + i + ".isNotified") == false) && pd.getString(usernameString) != null) {
                 Player target = event.getPlayer();
                 String warnReason = pd.getString(usernameString + ".Warn" + i + ".Message");
                 target.sendMessage(warnedMessage + warnReason);
                 pd.set(usernameString + ".Warn" + i + ".isNotified", "true");
-                //saves file 
+                //saves file
                 pd.save(playerdataf);
             }
         }
@@ -246,7 +258,11 @@ public class main extends JavaPlugin implements Listener {
     @Override
     public void onDisable() {
         plugin = this;
+        FileUpdater getdata = new FileUpdater();
         //import files
+        File configf = new File("plugins/IngotWarn","config.yml");
+        File languagef = new File("plugins/IngotWarn","language.yml");
+        File playerdataf = new File("plugins/IngotWarn","playerdata.yml");
         FileConfiguration config = getdata.getCustomData(plugin, "config", ROOT);
         FileConfiguration language = getdata.getCustomData(plugin, "language", ROOT);
         FileConfiguration pd = getdata.getCustomData(plugin, "playerdata", ROOT);

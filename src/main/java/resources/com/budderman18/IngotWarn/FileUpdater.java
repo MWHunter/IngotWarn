@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
 
 /**
@@ -19,13 +20,27 @@ import org.bukkit.plugin.Plugin;
 public class FileUpdater {
     Plugin plugin = main.getInstance();
     final String ROOT = "";
-    AdminWarn getdata = new AdminWarn();
+    /*
+    * This method is used to read and write to a given file
+    * Also handles YML loading
+    */
+    public YamlConfiguration getCustomData(Plugin plugin, String filename, String path) {
+        //check if folder is a thing
+        if (!plugin.getDataFolder().exists())
+        {
+            plugin.getDataFolder().mkdir();
+        }
+         //check if file broke somehow
+        File file = new File(plugin.getDataFolder() + "/" + path, filename + ".yml");
+        //load
+        return YamlConfiguration.loadConfiguration(file);
+    }
     File configf = new File("plugins/IngotWarn","config.yml");
     File languagef = new File("plugins/IngotWarn","language.yml");
     File playerdataf = new File("plugins/IngotWarn","playerdata.yml");
-    FileConfiguration config = getdata.getCustomData(plugin,"config",ROOT);
-    FileConfiguration language = getdata.getCustomData(plugin,"language",ROOT);
-    FileConfiguration pd = getdata.getCustomData(plugin,"playerdata",ROOT);
+    FileConfiguration config = this.getCustomData(plugin,"config",ROOT);
+    FileConfiguration language = this.getCustomData(plugin,"language",ROOT);
+    FileConfiguration pd = this.getCustomData(plugin,"playerdata",ROOT);
     public void updateConfig() {
         //version 1.1
         List<String> commentsVer1_1 = new ArrayList<String>();
@@ -53,26 +68,54 @@ public class FileUpdater {
         commentsVer1_1.add("don't touch this");
         language.set("version","1.1");
         language.setComments("version", commentsVer1_1);
-        language.set("Is-Notified-Message: ","&aisNotified: &b");
-        language.set("Added-Command-Succeeded-Message: ","&bCommand added!");
-        language.set("Added-Command-Failed-Message: ","&cCommand NOT added! &bAre you trying to edit? use \"edit\" instead!");
-        language.set("Delete-Command-Delete-Warn-Message: ","&bDeleted all commands at warn count &6");
-        language.set("Delete-Command-Delete-Command-Start-Message: ","&bDeleted command &6");
-        language.set("Delete-Command-Delete-Command-End-Message: "," &binside warn count &6");
-        language.set("Edit-Command-Edit-Start-Message: ","&bEdited command &6");
-        language.set("Edit-Command-Edit-End-Message: "," &bat warn count &6");
-        language.set("Edit-Command-Edit-Failed-Message: ","&cCommand NOT edited! Make sure you have a command at the designated values first!");
-        language.set("Cleared-Command-Message: ","&bCommands erased.");
-        language.set("List-Command-Start-Message: ","&eLoading specified command section(s)...");
-        language.set("List-Command-Warn-Start-Message: ","&aCommands at Warn");
-        language.set("List-Command-Warn-End-Message: ","&a: &b");
-        language.set("List-Command-Command-Start-Message: ","  &aCommand at Command");
-        language.set("List-Command-Command-End-Message: ","&a: &b");
-        language.set("List-Command-End-Message: ","&eDone!");
-        language.set("Player-Exists-Message: ","&4PLAYER ALREADY HAS DATA!!!! &bCopying over old data to new data...");
-        language.set("Outdated-Config-Message: ","&4OUTDATED CONFIG!!!! &bConverting to newest format...");
-        language.set("Outdated-Config-Message: ","&4OUTDATED LANGUAGE!!!! &bConverting to newest format...");
-        language.set("Outdated-Config-Message: ","&4OUTDATED PLAYERDATA!!!! &bConverting to newest format...");
+        language.createSection("Warn-Number-Message");
+        language.set("Warn-Number-Message", "&aWarn");
+        language.createSection("Is-Notified-Message");
+        language.set("Is-Notified-Message","&aisNotified: &b");
+        language.createSection("Version-Message-1");
+        language.set("Version-Message-1","&bVersion: &a");
+        language.createSection("Version-Message-2");
+        language.set("Version-Message-2", "&bThis plugin was made by &eBudderman18");
+        language.createSection("Added-Command-Succeeded-Message");
+        language.set("Added-Command-Succeeded-Message","&bCommand added!");
+        language.createSection("Added-Command-Failed-Message");
+        language.set("Added-Command-Failed-Message","&cCommand NOT added! &bAre you trying to edit? use \"edit\" instead!");
+        language.createSection("Delete-Command-Delete-Warn-Message");
+        language.set("Delete-Command-Delete-Warn-Message","&bDeleted all commands at warn count &6");
+        language.createSection("Delete-Command-Delete-Command-Start-Message");
+        language.set("Delete-Command-Delete-Command-Start-Message","&bDeleted command &6");
+        language.createSection("Delete-Command-Delete-Command-End-Message");
+        language.set("Delete-Command-Delete-Command-End-Message"," &binside warn count &6");
+        language.createSection("Edit-Command-Edit-Start-Message");
+        language.set("Edit-Command-Edit-Start-Message","&bEdited command &6");
+        language.createSection("Edit-Command-Edit-End-Message");
+        language.set("Edit-Command-Edit-End-Message"," &bat warn count &6");
+        language.createSection("Edit-Command-Edit-Failed-Message");
+        language.set("Edit-Command-Edit-Failed-Message","&cCommand NOT edited! Make sure you have a command at the designated values first!");
+        language.createSection("Cleared-Command-Message");
+        language.set("Cleared-Command-Message","&bCommands erased.");
+        language.createSection("Cleared-Command-Index-Message");
+        language.set("Cleared-Command-Index-Message", "at index &6");
+        language.createSection("List-Command-Start-Message");
+        language.set("List-Command-Start-Message","&eLoading specified command section(s)...");
+        language.createSection("List-Command-Warn-Start-Message");
+        language.set("List-Command-Warn-Start-Message","&aCommands at Warn");
+        language.createSection("List-Command-Warn-End-Message");
+        language.set("List-Command-Warn-End-Message","&a: &b");
+        language.createSection("List-Command-Command-Start-Message");
+        language.set("List-Command-Command-Start-Message","  &aCommand at Command");
+        language.createSection("List-Command-Command-End-Message");
+        language.set("List-Command-Command-End-Message","&a: &b");
+        language.createSection("List-Command-End-Message");
+        language.set("List-Command-End-Message","&eDone!");
+        language.createSection("Player-Exists-Message");
+        language.set("Player-Exists-Message","&4PLAYER ALREADY HAS DATA!!!! &bCopying over old data to new data...");
+        language.createSection("Outdated-Config-Message");
+        language.set("Outdated-Config-Message","&4OUTDATED CONFIG!!!! &bConverting to newest format...");
+        language.createSection("Outdated-Language-Message");
+        language.set("Outdated-Language-Message","&4OUTDATED LANGUAGE!!!! &bConverting to newest format...");
+        language.createSection("Outdated-Player-Data-Message");
+        language.set("Outdated-Player-Data-Message","&4OUTDATED PLAYERDATA!!!! &bConverting to newest format...");
         //update file
         try {
             language.save(languagef);

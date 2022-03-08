@@ -18,7 +18,7 @@ public class CheckWarn implements TabExecutor {
     //used if the given file isnt in another folder
     final String ROOT = "";
     //imports files
-    AdminWarn getdata = new AdminWarn();
+    FileUpdater getdata = new FileUpdater();
     FileConfiguration config = getdata.getCustomData(plugin,"config",ROOT);
     FileConfiguration language = getdata.getCustomData(plugin,"language",ROOT);
     /**
@@ -41,8 +41,10 @@ public class CheckWarn implements TabExecutor {
         String noPlayerMessage = ChatColor.translateAlternateColorCodes('&', language.getString("No-Player-Message"));
         String playerMessage = ChatColor.translateAlternateColorCodes('&', language.getString("Player-Message"));
         String uuidMessage = ChatColor.translateAlternateColorCodes('&', language.getString("UUID-Message"));
+        String warnNumberMessage = ChatColor.translateAlternateColorCodes('&', language.getString("Warn-Number-Message"));
         String warnStartMessage = ChatColor.translateAlternateColorCodes('&', language.getString("Warn-Start-Message"));
         String warnEndMessage = ChatColor.translateAlternateColorCodes('&', language.getString("Warn-End-Message"));
+        String isNotifiedMessage = ChatColor.translateAlternateColorCodes('&', language.getString("Is-Notified-Message"));
         String startOfListMessage = ChatColor.translateAlternateColorCodes('&', language.getString("Start-Of-List-Message"));
         String endOfListMessage = ChatColor.translateAlternateColorCodes('&', language.getString("End-Of-List-Message"));
         if (cmd.getName().equalsIgnoreCase("checkwarns")) {
@@ -62,8 +64,10 @@ public class CheckWarn implements TabExecutor {
                         byte maxWarns = (byte) Integer.parseInt(config.getString("Max-Warns"));
                         sender.sendMessage(uuidMessage + pd.getString(usernameString + ".UUID"));
                         for (byte i=1; i < maxWarns + 1; i++) {
-                            if (pd.get(usernameString+".Warn" + i) != null) {
-                                sender.sendMessage(warnStartMessage + i + warnEndMessage + pd.get(usernameString+".Warn" + i));
+                            if (pd.get(usernameString+".Warn" + i + ".Message") != null) {
+                                sender.sendMessage(warnNumberMessage + i + ':');
+                                sender.sendMessage("    " + warnStartMessage + i + warnEndMessage + pd.getString(usernameString+".Warn" + i + ".Message"));
+                                sender.sendMessage("    " + isNotifiedMessage + pd.getBoolean(usernameString + ".Warn" + i + ".isNotified"));
                             }
                             else {
                                 i = maxWarns;
@@ -95,8 +99,10 @@ public class CheckWarn implements TabExecutor {
                         byte maxWarns = (byte) Integer.parseInt(config.getString("Max-Warns"));
                         sender.sendMessage(uuidMessage + pd.getString(usernameString + ".UUID"));
                         for (byte i=1; i < maxWarns + 1; i++) {
-                            if (pd.get(usernameString+".Warn" + i) != null) {
-                                sender.sendMessage(warnStartMessage + i + warnEndMessage + pd.get(usernameString+".Warn" + i));
+                            if (pd.get(usernameString+".Warn" + i + ".Message") != null) {
+                                sender.sendMessage(warnNumberMessage + i + ':');
+                                sender.sendMessage("    " + warnStartMessage + i + warnEndMessage + pd.getString(usernameString+".Warn" + i + ".Message"));
+                                sender.sendMessage("    " + isNotifiedMessage + pd.getBoolean(usernameString + ".Warn" + i + ".isNotified"));
                             }
                             else {
                                 i = maxWarns;

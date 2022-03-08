@@ -13,28 +13,12 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
 
 /**
  * This class handles the adminwarns command
  */
 public class AdminWarn implements TabExecutor {
-    /*
-    * THis method is used to read and write to a given file
-    * Also handles YML loading
-    */
-    public YamlConfiguration getCustomData(Plugin plugin, String filename, String path) {
-        //check if folder is a thing
-        if (!plugin.getDataFolder().exists())
-        {
-            plugin.getDataFolder().mkdir();
-        }
-         //check if file broke somehow
-        File file = new File(plugin.getDataFolder() + "/" + path, filename + ".yml");
-        //load
-        return YamlConfiguration.loadConfiguration(file);
-    }
     /**
      * This method handles everything related to the adminwarns command
      * TabCompletion has its own method
@@ -53,15 +37,16 @@ public class AdminWarn implements TabExecutor {
     final String ROOT = "";
     //retrive plugin instance
     Plugin plugin = main.getInstance();
+    FileUpdater getdata = new FileUpdater();
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
         //import files
         File configf = new File(plugin.getDataFolder(),"config.yml");
         File languagef = new File(plugin.getDataFolder(),"language.yml");
         File playerdataf = new File(plugin.getDataFolder(),"playerdata.yml");
-        FileConfiguration config = this.getCustomData(plugin, "config", ROOT);
-        FileConfiguration language = this.getCustomData(plugin, "language", ROOT);
-        FileConfiguration pd = this.getCustomData(plugin, "playerdata", ROOT);
+        FileConfiguration config = getdata.getCustomData(plugin, "config", ROOT);
+        FileConfiguration language = getdata.getCustomData(plugin, "language", ROOT);
+        FileConfiguration pd = getdata.getCustomData(plugin, "playerdata", ROOT);
         //import version
         String version = config.getString("version");
         //import maxwarns
@@ -89,6 +74,7 @@ public class AdminWarn implements TabExecutor {
         String editCommandEditEndMessage= ChatColor.translateAlternateColorCodes('&', language.getString("Edit-Command-Edit-End-Message"));
         String editCommandEditFailedMessage= ChatColor.translateAlternateColorCodes('&', language.getString("Edit-Command-Edit-Failed-Message"));
         String clearedCommandMessage= ChatColor.translateAlternateColorCodes('&', language.getString("Cleared-Command-Message"));
+        String clearedCommandIndexMessage= ChatColor.translateAlternateColorCodes('&', language.getString("Cleared-Command-Index-Message"));
         String listCommandStartMessage = ChatColor.translateAlternateColorCodes('&', language.getString("List-Command-Start-Message"));
         String listCommandWarnStartMessage= ChatColor.translateAlternateColorCodes('&', language.getString("List-Command-Warn-Start-Message"));
         String listCommandWarnEndMessage= ChatColor.translateAlternateColorCodes('&', language.getString("List-Command-Warn-End-Message"));
@@ -271,6 +257,7 @@ public class AdminWarn implements TabExecutor {
                     }
                     //command manager
                     if (args[0].equalsIgnoreCase("commands") && args.length > 1) {
+                        //commands add
                         if (args[1].equalsIgnoreCase("add") && args.length > 2) {
                             //combine args into string
                             String[] split = Arrays.copyOfRange(args, 3, args.length);
@@ -318,8 +305,11 @@ public class AdminWarn implements TabExecutor {
                                 return true;
                             }
                         }
+                        //commands delete command
                         if (args[1].equalsIgnoreCase("delete")) {
+                            //delete all commands in a given warn
                             if (args.length == 3) {
+                                //check if numbers are valid
                                 warnIndex = args[2];
                                 try {
                                     tempWarnIndex = Byte.parseByte(warnIndex);
@@ -339,12 +329,15 @@ public class AdminWarn implements TabExecutor {
                                     }
                                     return true;
                                 }
+                                //send if anything was invalid
                                 else {
                                     sender.sendMessage(prefixMessage + incorrectCommandMessage);
                                     return false;
                                 }
                             }
+                            //delete a given command
                             if (args.length == 4) {
+                                //check if number is valid
                                 warnIndex = args[2];
                                 commandIndex = args[3];
                                 byte tempCommandIndex;
@@ -382,18 +375,23 @@ public class AdminWarn implements TabExecutor {
                                     }
                                     return true;
                                 }
+                                //send if anything was invalid
                                 else {
                                     sender.sendMessage(prefixMessage + incorrectCommandMessage);
                                     return false;
                                 }
                             }
+                            //send if anything was invalid
                             else {
                                 sender.sendMessage(prefixMessage + incorrectCommandMessage);
                                 return false;
                             }
                         }
+                        //commands edit command
                         if (args[1].equalsIgnoreCase("edit")) {
+                            //check if command is valid
                             if (args.length >= 5 && (args[4] != null || !"".equals(args[4]))) {
+                                //check if numbers are valid
                                 warnIndex = args[2];
                                 commandIndex = args[3];
                                 byte tempCommandIndex;
@@ -412,6 +410,7 @@ public class AdminWarn implements TabExecutor {
                                 //combine args into string
                                 String[] split = Arrays.copyOfRange(args, 4, args.length);
                                 commandEditString = String.join(" ", split);
+                                //set data
                                 if ((tempWarnIndex > 0 && tempWarnIndex <= maxWarns) && (tempCommandIndex > 0 && tempCommandIndex < 127)) {
                                     if (config.getString("Commands.Warn" + tempWarnIndex + ".Command" + tempCommandIndex) != null) {    
                                         config.set("Commands.Warn" + tempWarnIndex + ".Command" + tempCommandIndex, commandEditString);
@@ -430,17 +429,21 @@ public class AdminWarn implements TabExecutor {
                                         return false;
                                     }
                                 }
+                                //send if anything was invalid
                                 else {
                                     sender.sendMessage(prefixMessage + incorrectCommandMessage);
                                     return false;
                                 }
-                            }
+                            } 
+                            //send if anything was invalid
                             else {
                                 sender.sendMessage(prefixMessage + incorrectCommandMessage);
                                 return false;
                             }
                         }
+                        //commands clear command
                         if (args[1].equalsIgnoreCase("clear")) {
+                            //clear all commands
                             if (args.length == 2) {
                                 config.set("Commands", "");
                                 sender.sendMessage(prefixMessage + clearedCommandMessage);
@@ -453,12 +456,35 @@ public class AdminWarn implements TabExecutor {
                                 }
                                 return true;
                             }
+                            //clear a specific warn's command
+                            if (args.length == 3) {
+                                //check if numbers are valid
+                                warnIndex = args[2];
+                                try {
+                                    tempWarnIndex = Byte.parseByte(warnIndex);
+                                } 
+                                catch (NumberFormatException ex) {
+                                    tempWarnIndex = 0;
+                                }
+                                config.set("Commands.Warn" + tempWarnIndex, "");
+                                sender.sendMessage(prefixMessage + clearedCommandMessage + clearedCommandIndexMessage + tempWarnIndex);
+                                //save file
+                                try {
+                                    config.save(configf);
+                                } 
+                                catch (IOException ex) {
+                                    Logger.getLogger(Warn.class.getName()).log(Level.SEVERE, null, ex);
+                                }
+                                return true;
+                            }//send if anything was invalid
                             else {
                                 sender.sendMessage(prefixMessage + incorrectCommandMessage);
                                 return false;
                             }
                         }
+                        //commands list command
                         if (args[1].equalsIgnoreCase("list")) {
+                            //list all commands
                             if (args.length == 2) {
                                 sender.sendMessage(prefixMessage + listCommandStartMessage);
                                 for (byte i = 1; i <= maxWarns; i++) {
@@ -477,7 +503,9 @@ public class AdminWarn implements TabExecutor {
                                 sender.sendMessage(prefixMessage + listCommandEndMessage);
                                 return true;
                             }
+                            //list a specific warn's command
                             if (args.length == 3) {
+                                //check if numbers are valid
                                 warnIndex = args[2];
                                 try {
                                     tempWarnIndex = Byte.parseByte(warnIndex);
@@ -499,21 +527,25 @@ public class AdminWarn implements TabExecutor {
                                     sender.sendMessage(prefixMessage + listCommandEndMessage); 
                                     return true;
                                 }
+                                //send if anything was invalid
                                 else {
                                     sender.sendMessage(prefixMessage + incorrectCommandMessage);
                                     return false;
                                 }
                             }
+                            //send if anything was invalid
                             else {
                                 sender.sendMessage(prefixMessage + incorrectCommandMessage);
                                 return false;
                             }
                         }
+                        //send if commands list is invalid
                         else {
                             sender.sendMessage(prefixMessage + incorrectCommandMessage);
                             return false;
                         }
-                    } 
+                    }
+                    //send if commands is invalid
                     else {
                         sender.sendMessage(prefixMessage + incorrectCommandMessage);
                         return false;
@@ -562,7 +594,7 @@ public class AdminWarn implements TabExecutor {
         //commands add args
         if (args.length == 3 && args[1].equalsIgnoreCase("add")) {
             List<String> arguments = new ArrayList<>();
-            FileConfiguration config = this.getCustomData(plugin, "config", ROOT);
+            FileConfiguration config = getdata.getCustomData(plugin, "config", ROOT);
             byte maxWarns = Byte.parseByte(config.getString("Max-Warns"));
             for (byte i=1; i <= maxWarns; i++) {
                 arguments.add(Byte.toString(i));
@@ -572,7 +604,7 @@ public class AdminWarn implements TabExecutor {
         //command clear and list args
         if (args.length == 3 && (args[1].equalsIgnoreCase("clear") || args[1].equalsIgnoreCase("list"))) {
             List<String> arguments = new ArrayList<>();
-            FileConfiguration config = this.getCustomData(plugin, "config", ROOT);
+            FileConfiguration config = getdata.getCustomData(plugin, "config", ROOT);
             byte maxWarns = Byte.parseByte(config.getString("Max-Warns"));
             for (byte i=1; i <= maxWarns; i++) {
                 if (config.getString("Commands.Warn" + i) != null) {
@@ -584,7 +616,7 @@ public class AdminWarn implements TabExecutor {
         //command delete and edit args
         if (args.length == 3 && (args[1].equalsIgnoreCase("edit") || args[1].equalsIgnoreCase("delete"))) {
             List<String> arguments = new ArrayList<>();
-            FileConfiguration config = this.getCustomData(plugin, "config", ROOT);
+            FileConfiguration config = getdata.getCustomData(plugin, "config", ROOT);
             byte maxWarns = Byte.parseByte(config.getString("Max-Warns"));
             for (byte i=1; i <= maxWarns; i++) {
                 if (config.getString("Commands.Warn" + i) != null) {
@@ -595,7 +627,7 @@ public class AdminWarn implements TabExecutor {
         }
         if (args.length == 4 && (args[1].equalsIgnoreCase("edit") || args[1].equalsIgnoreCase("delete"))) {
             List<String> arguments = new ArrayList<>();
-            FileConfiguration config = this.getCustomData(plugin, "config", ROOT);
+            FileConfiguration config = getdata.getCustomData(plugin, "config", ROOT);
             String warnIndex = args[2];
             byte tempWarnIndex;
             try {
@@ -616,8 +648,8 @@ public class AdminWarn implements TabExecutor {
         }
         //used to retrive indexes for edit and delete commands
         if (args.length == 3 && (args[0].equalsIgnoreCase("edit") || args[0].equalsIgnoreCase("delete"))) {
-            FileConfiguration config = this.getCustomData(plugin, "config", ROOT);
-            FileConfiguration pd = this.getCustomData(plugin, "playerdata", ROOT);
+            FileConfiguration config = getdata.getCustomData(plugin, "config", ROOT);
+            FileConfiguration pd = getdata.getCustomData(plugin, "playerdata", ROOT);
             List<String> arguments = new ArrayList<>();
             String usernameString;
             String warnNumberString;
