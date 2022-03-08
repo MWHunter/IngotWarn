@@ -9,11 +9,11 @@ commands:
    checkwarns:
        description: Check your warns
        default: true
-       usage: /warn (player)
+       usage: /checkwarns (player)
    adminwarn:
        description: Access admin management for IngotWarn
        default: op
-       usage: /warn [command] (player) (index)
+       usage: /adminwarn [command]
 permissions:
    ingotwarn.warn:
       description: Gives access to the warn command

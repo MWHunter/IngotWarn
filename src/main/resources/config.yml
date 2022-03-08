@@ -10,5 +10,5 @@ Max-Warns: "10"
 # You must put them in numeric order or some commands may not send!
 # use %player% for the player's username. use %target% for the sender's username
 # Warnx: <--- X is what warn number you want the command to occur on
-#  Commandx <--- X is the number for the command. Keep it in numeric order, as that's the order they will execute in. Max amount of commands is 126
-Commands:
+#   Commandx <--- X is the number for the command. Keep it in numeric order, as that's the order they will execute in. Max amount of commands is 126
+Commands: {}

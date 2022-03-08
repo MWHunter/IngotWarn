@@ -1,5 +1,5 @@
 #don't change this
-Version: "1.1"
+version: "1.1"
 #Name:
 #  UUID:
 #  Warnx: <-- X is the warn number you're on. Stay in numeric order or it will break things
