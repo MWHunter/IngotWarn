@@ -9,7 +9,10 @@ FEATURES:
 - Configure output messages with laguage.yml
 - Check your own warns with a command
 - Check others' warns with the command above and a separate permission
-- Manage player's files within the game, no need to edit playerdata.yml
+- Manage player's files within the game, no need to edit any files except language.yml
+- Alert players that were warned offline when they rejoin
+- Execute commands on a given warn amount
+- Check if player changed their username and copy over their data if they have
 
 COMMANDS:
 
@@ -28,9 +31,3 @@ PERMISSIONS:
 - ingotwarn.checkwarns - gives access to the /checkwarns command
 - ingotwarn.checkwarns.others - gives access to checking other players within the /checkwarns command
 - ingotwarn.adminwarn - gives access to the /adminwarn command
-
-PLANNED FEATURES:
-
-- Alert players that were warned offline when they rejoin
-- Execute commands on a given warn amount
-- Check if player changed their username and copy over their data if they have
