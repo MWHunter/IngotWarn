@@ -135,8 +135,7 @@ public class main extends JavaPlugin implements Listener {
         if (!(Bukkit.getVersion().contains("1.18.2"))) {
             sender.sendMessage(prefixMessage + unsupportedVersionAMessage);
             sender.sendMessage(prefixMessage + unsupportedVersionBMessage);
-            sender.sendMessage(prefixMessage + unsupportedVersionCMessage);
-            return;   
+            sender.sendMessage(prefixMessage + unsupportedVersionCMessage);  
         }
         //check for online mode
         if (!(getServer().getOnlineMode())) {
