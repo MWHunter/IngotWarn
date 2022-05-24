@@ -138,7 +138,7 @@ public class main extends JavaPlugin implements Listener {
             sender.sendMessage(prefixMessage + unsupportedVersionCMessage);  
         }
         //check for online mode
-        if (!(getServer().getOnlineMode())) {
+        if (getServer().getOnlineMode()) {
             sender.sendMessage(prefixMessage + unsecureServerAMessage);
             sender.sendMessage(prefixMessage + unsecureServerBMessage);
             sender.sendMessage(prefixMessage + unsecureServerCMessage);
